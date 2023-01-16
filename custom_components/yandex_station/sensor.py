@@ -9,6 +9,8 @@ from homeassistant.components.sensor import SensorEntity
 from homeassistant.components.sensor import SensorEntityDescription
 from homeassistant.const import PERCENTAGE
 from homeassistant.const import TEMP_CELSIUS
+from homeassistant.const import PRESSURE_MMHG
+from homeassistant.const import LIGHT_LUX
 
 from . import CONF_INCLUDE
 from . import DATA_CONFIG
@@ -17,7 +19,7 @@ from . import YandexQuasar
 
 _LOGGER = logging.getLogger(__name__)
 
-DEVICES = ["devices.types.humidifier"]
+DEVICES = ["devices.types.humidifier", "devices.types.sensor"]
 
 SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
     SensorEntityDescription(
@@ -30,6 +32,24 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         key="humidity",
         name="Humidity",
         native_unit_of_measurement=PERCENTAGE,
+        state_class=STATE_CLASS_MEASUREMENT,
+    ),
+    SensorEntityDescription(
+        key="pressure",
+        name="Pressure",
+        native_unit_of_measurement=PRESSURE_MMHG,
+        state_class=STATE_CLASS_MEASUREMENT,
+    ),
+    SensorEntityDescription(
+        key="illumination",
+        name="Illumination",
+        native_unit_of_measurement=LIGHT_LUX,
+        state_class=STATE_CLASS_MEASUREMENT,
+    ),
+    SensorEntityDescription(
+        key="motion",
+        name="Motion",
+        native_unit_of_measurement="",
         state_class=STATE_CLASS_MEASUREMENT,
     ),
 )
@@ -67,6 +87,9 @@ class YandexSensor(SensorEntity):
 
     _humidity = None
     _temperature = None
+    _pressure = None
+    _illumination = None
+    _motion_time = None
 
     def __init__(
         self,
@@ -101,6 +124,21 @@ class YandexSensor(SensorEntity):
         """Return current temperature."""
         return self._temperature
 
+    @property
+    def pressure(self) -> int:
+        """Return current pressure."""
+        return self._pressure
+
+    @property
+    def illumination(self) -> int:
+        """Return current illumination."""
+        return self._illumination
+
+    @property
+    def motion(self) -> int:
+        """Return last motion event type."""
+        return self._motion_time
+
     async def async_update(self):
         """Update the entity."""
         data = await self.quasar.get_device(self.device["id"])
@@ -110,6 +148,12 @@ class YandexSensor(SensorEntity):
                 self._humidity = prop["state"]["value"]
             if instance == "temperature":
                 self._temperature = prop["state"]["value"]
+            if instance == "pressure":
+                self._pressure = prop["state"]["value"]
+            if instance == "illumination":
+                self._illumination = prop["state"]["value"]
+            if instance == "motion":
+                self._motion_time = prop["last_updated"]
 
     @property
     def native_value(self) -> Any:
