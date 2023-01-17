@@ -89,7 +89,7 @@ class YandexSensor(SensorEntity):
     _temperature = None
     _pressure = None
     _illumination = None
-    _motion_time = None
+    _motion = None
 
     def __init__(
         self,
@@ -136,14 +136,17 @@ class YandexSensor(SensorEntity):
 
     @property
     def motion(self) -> int:
-        """Return last motion event type."""
-        return self._motion_time
+        """Return last motion event."""
+        return self._motion
 
     async def async_update(self):
         """Update the entity."""
         data = await self.quasar.get_device(self.device["id"])
+        instances = []
+
         for prop in data["properties"]:
             instance = prop["parameters"]["instance"]
+            instances.append(instance)
             if instance == "humidity":
                 self._humidity = prop["state"]["value"]
             if instance == "temperature":
@@ -153,7 +156,11 @@ class YandexSensor(SensorEntity):
             if instance == "illumination":
                 self._illumination = prop["state"]["value"]
             if instance == "motion":
-                self._motion_time = prop["last_updated"]
+                self._motion = prop["state"]["value"]
+
+        
+        if "motion" not in instances:
+            self._motion = "cleared"
 
     @property
     def native_value(self) -> Any:
