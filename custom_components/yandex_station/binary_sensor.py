@@ -28,6 +28,8 @@ SENSOR_TYPES: tuple[BinarySensorEntityDescription, ...] = (
     ),
 )
 
+TIMEOUT_SEC = 180
+
 
 async def async_setup_entry(hass, entry, async_add_entities):
     """Set up sensor from a config entry."""
@@ -96,7 +98,7 @@ class YandexBinarySensor(BinarySensorEntity):
             if instance == "motion":
                 motion_last_updated = prop["last_updated"]
                 time_now = time.time()
-                if abs(time_now - motion_last_updated) > 180:
+                if abs(time_now - float(motion_last_updated)) > TIMEOUT_SEC:
                     self._motion = "On"
                 else:
                     self._motion = "Off"
