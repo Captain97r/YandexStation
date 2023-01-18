@@ -25,7 +25,7 @@ SENSOR_TYPES: tuple[BinarySensorEntityDescription, ...] = (
         key="motion",
         name="Motion",
         device_class=DEVICE_CLASS_MOTION
-    )
+    ),
 )
 
 
