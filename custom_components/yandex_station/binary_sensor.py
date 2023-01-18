@@ -88,8 +88,8 @@ class YandexBinarySensor(BinarySensorEntity):
         return f"{self.device['name']}: {self.sensor_name}"
 
     @property
-    def motion(self) -> string:
-        """Return last motion event."""
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
         return self._motion
 
     async def async_update(self):
@@ -104,9 +104,9 @@ class YandexBinarySensor(BinarySensorEntity):
                 motion_sec = calendar.timegm(motion_dt.timetuple())
                 time_now = time.time()
                 if abs(time_now - motion_sec) > TIMEOUT_SEC:
-                    self._motion = "On"
+                    self._motion = False
                 else:
-                    self._motion = "Off"
+                    self._motion = True
 
     @property
     def native_value(self) -> Any:
