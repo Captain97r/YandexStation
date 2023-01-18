@@ -45,6 +45,7 @@ SUB_DOMAINS = [
     "vacuum",
     "humidifier",
     "sensor",
+    "binary_sensor",
     "water_heater",
 ]
 
