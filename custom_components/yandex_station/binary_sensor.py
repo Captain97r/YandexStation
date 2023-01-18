@@ -22,7 +22,9 @@ DEVICES = ["devices.types.sensor"]
 
 SENSOR_TYPES: tuple[BinarySensorEntityDescription, ...] = (
     BinarySensorEntityDescription(
-        device_class=DEVICE_CLASS_MOTION,
+        key="motion",
+        name="Motion",
+        device_class=DEVICE_CLASS_MOTION
     )
 )
 
@@ -38,7 +40,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             data = await quasar.get_device(device["id"])
             for prop in data["properties"]:
                 for description in SENSOR_TYPES:
-                    if prop["parameters"]["instance"] == description.device_class:
+                    if prop["parameters"]["instance"] == description.key:
                         devices.append(
                             YandexBinarySensor(
                                 quasar,
