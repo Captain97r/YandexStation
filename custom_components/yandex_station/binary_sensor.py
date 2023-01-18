@@ -3,8 +3,11 @@ from __future__ import annotations
 
 import logging
 import string
-import time
 from typing import Any
+
+from datetime import datetime
+import time
+import calendar
 
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
@@ -97,8 +100,10 @@ class YandexBinarySensor(BinarySensorEntity):
             instance = prop["parameters"]["instance"]
             if instance == "motion":
                 motion_last_updated = prop["last_updated"]
+                motion_dt = datetime.strptime(motion_last_updated, '%Y-%m-%dT%H:%M:%SZ')
+                motion_sec = calendar.timegm(motion_dt.timetuple())
                 time_now = time.time()
-                if abs(time_now - float(motion_last_updated)) > TIMEOUT_SEC:
+                if abs(time_now - motion_sec) > TIMEOUT_SEC:
                     self._motion = "On"
                 else:
                     self._motion = "Off"
