@@ -45,16 +45,8 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         name="Illumination",
         native_unit_of_measurement=LIGHT_LUX,
         state_class=STATE_CLASS_MEASUREMENT,
-    ),
-    SensorEntityDescription(
-        key="motion",
-        name="Motion",
-        native_unit_of_measurement="",
-        state_class=STATE_CLASS_MEASUREMENT,
-    ),
+    )
 )
-
-SENSOR_KEYS: list[str] = [desc.key for desc in SENSOR_TYPES]
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
@@ -89,7 +81,6 @@ class YandexSensor(SensorEntity):
     _temperature = None
     _pressure = None
     _illumination = None
-    _motion = None
 
     def __init__(
         self,
@@ -134,19 +125,12 @@ class YandexSensor(SensorEntity):
         """Return current illumination."""
         return self._illumination
 
-    @property
-    def motion(self) -> int:
-        """Return last motion event."""
-        return self._motion
-
     async def async_update(self):
         """Update the entity."""
         data = await self.quasar.get_device(self.device["id"])
-        instances = []
 
         for prop in data["properties"]:
             instance = prop["parameters"]["instance"]
-            instances.append(instance)
             if instance == "humidity":
                 self._humidity = prop["state"]["value"]
             if instance == "temperature":
@@ -155,12 +139,6 @@ class YandexSensor(SensorEntity):
                 self._pressure = prop["state"]["value"]
             if instance == "illumination":
                 self._illumination = prop["state"]["value"]
-            if instance == "motion":
-                self._motion = prop["state"]["value"]
-
-        
-        if "motion" not in instances:
-            self._motion = "cleared"
 
     @property
     def native_value(self) -> Any:
